@@ -1,0 +1,31 @@
+{
+  "name": "tzlion/wiktionator",
+  "description": "wiktionary word thing",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "taizou",
+      "homepage": "https://github.com/tzlion"
+    }
+  ],
+  "repositories": [
+    {
+        "type": "composer",
+        "url": "http://cmp.lion.li/"
+    }
+  ],
+  "require": {
+    "tzlion/neodb": "0.1.0",
+    "php": ">=5.4",
+    "ext-simplexml": "*",
+    "ext-json": "*"
+  },
+  "config": {
+    "secure-http": false
+  },
+  "autoload": {
+    "psr-4": {
+      "TzLion\\Wiktionator\\": "src/"
+    }
+  }
+}
