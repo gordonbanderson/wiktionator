@@ -4,42 +4,61 @@ namespace TzLion\Wiktionator;
 
 class ApiWiktionator extends Wiktionator
 {
+    const EN_WIKTIONARY_API_URL = 'http://en.wiktionary.org/w/api.php';
+
+    private function jsonQuery($queryParts)
+    {
+        $url = $this->buildQueryUrl('json',$queryParts);
+        return json_decode(file_get_contents($url),true)['query'];
+    }
+
+    private function xmlQuery($queryParts)
+    {
+        $url = $this->buildQueryUrl('xml',$queryParts);
+        return simplexml_load_string(file_get_contents($url))->query;
+    }
+
+    private function buildQueryUrl($format,$queryParts)
+    {
+        $queryParts['action'] = 'query';
+        $queryParts['format'] = $format;
+        return self::EN_WIKTIONARY_API_URL . '?' . http_build_query($queryParts);
+    }
+
     public function getWordPage( $word )
     {
-        $xml = file_get_contents ("http://en.wiktionary.org/w/api.php?rawcontinue=iguess&format=xml&action=query&titles=".urlencode(strtolower($word))."&rvprop=content&prop=revisions&redirects=1" );
-        $stuff = simplexml_load_string($xml);
-        return (string)$stuff->query->pages->page->revisions->rev;
+        $queryParts = [ 'rawcontinue' => 'iguess', 'titles' => strtolower($word), 'rvprop' => 'content',
+                        'prop' => 'revisions', 'redirect' => 1 ];
+        $stuff = $this->xmlQuery($queryParts);
+        return (string)$stuff->pages->page->revisions->rev;
     }
 
     public function isWordInCategory($word, $category)
     {
-        $category = urlencode( str_replace( " ", "_", $category ) );
-        $url = "http://en.wiktionary.org/w/api.php?action=query&prop=categories&format=json" .
-            "&clcategories=Category%3A".($category)."&titles=".urlencode($word);
-        $query = json_decode( file_get_contents($url),true);
-        $pg = reset($query["query"]["pages"]);
+        $category = str_replace( " ", "_", $category );
+        $queryParts = ['prop'=>'categories','clcategories'=>'Category:'.$category,'titles'=>$word];
+        $query = $this->jsonQuery($queryParts);
+        $pg = reset($query["pages"]);
         if ( isset( $pg["categories"] )) return true;
         return false;
     }
 
     public function getWordCategories($word)
     {
-        $url = "https://en.wiktionary.org/w/api.php?action=query&prop=categories&format=json&cllimit=500&titles=" . urlencode( $word );
-        $query = json_decode( file_get_contents($url),true);
-        $page = reset($query["query"]["pages"]);
+        $queryParts = [ 'prop' => 'categories', 'cllimit' => 500, 'titles' => $word ];
+        $query = $this->jsonQuery($queryParts);
+        $page = reset($query["pages"]);
         return $page['categories'];
     }
 
     public function getRandomWordInCategory($category)
     {
-        $category = urlencode( str_replace( " ", "_", $category ) );
+        $category = str_replace( " ", "_", $category );
         $sortkey = $this->generateRandomSortKey();
-        $url = "http://en.wiktionary.org/w/api.php?action=query&list=categorymembers&format=json" .
-            "&cmtitle=Category%3A{$category}&cmprop=title&cmnamespace=0&cmtype=page&cmlimit=50&cmsort=sortkey" .
-            "&cmstartsortkeyprefix=" . urlencode($sortkey);
-
-        $words = json_decode( file_get_contents($url),true);
-        $cm = $words['query']['categorymembers'];
+        $queryParts = ['list'=>'categorymembers','cmtitle'=>'Category:'.$category,'cmprop'=>'title','cmnamespace'=>0,
+                       'cmtype'=>'page','cmlimit'=>50,'cmsort'=>'sortkey','cmstartsortkeyprefix'=>$sortkey];
+        $words = $this->jsonQuery($queryParts);
+        $cm = $words['categorymembers'];
 
         return Util::randomFromArray($cm)['title'];
     }
