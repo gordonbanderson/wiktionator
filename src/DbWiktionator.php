@@ -49,15 +49,9 @@ class DbWiktionator extends Wiktionator
 
     public function getRandomWordInCategory($category)
     {
-        $st = microtime(true);
-        /*$category = str_replace( " ", "_", $category );
-        $res = $this->db->fetch( NeoDb::F_ONE, "SELECT page_title FROM category LEFT JOIN categorylinks ON cl_cat = cat_id LEFT JOIN page ON page_id = cl_page WHERE cat_title = ? AND page_namespace = 0 ORDER BY RAND() LIMIT 1", [ $category ] );*/
-
         $catId = $this->getCatId( $category );
         $wordId = $this->db->fetch( NeoDb::F_ONE, "SELECT cl_page FROM categorylinks WHERE cl_type = 'page' AND cl_cat = ? ORDER BY RAND() LIMIT 1", [ $catId ] );
         $res = $this->getWordTitle( $wordId );
-
-        var_dump( "RAND TIME::" . ( microtime(true)-$st));
         return $res;
     }
 

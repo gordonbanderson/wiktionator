@@ -9,13 +9,13 @@ class ApiWiktionator extends Wiktionator
     private function jsonQuery($queryParts)
     {
         $url = $this->buildQueryUrl('json',$queryParts);
-        return json_decode(file_get_contents($url),true)['query'];
+        return json_decode(file_get_contents($url),true);
     }
 
     private function xmlQuery($queryParts)
     {
         $url = $this->buildQueryUrl('xml',$queryParts);
-        return simplexml_load_string(file_get_contents($url))->query;
+        return simplexml_load_string(file_get_contents($url));
     }
 
     private function buildQueryUrl($format,$queryParts)
@@ -30,14 +30,14 @@ class ApiWiktionator extends Wiktionator
         $queryParts = [ 'rawcontinue' => 'iguess', 'titles' => strtolower($word), 'rvprop' => 'content',
                         'prop' => 'revisions', 'redirect' => 1 ];
         $stuff = $this->xmlQuery($queryParts);
-        return (string)$stuff->pages->page->revisions->rev;
+        return (string)$stuff->query->pages->page->revisions->rev;
     }
 
     public function isWordInCategory($word, $category)
     {
         $category = str_replace( " ", "_", $category );
         $queryParts = ['prop'=>'categories','clcategories'=>'Category:'.$category,'titles'=>$word];
-        $query = $this->jsonQuery($queryParts);
+        $query = $this->jsonQuery($queryParts)['query'];
         $pg = reset($query["pages"]);
         if ( isset( $pg["categories"] )) return true;
         return false;
@@ -46,7 +46,7 @@ class ApiWiktionator extends Wiktionator
     public function getWordCategories($word)
     {
         $queryParts = [ 'prop' => 'categories', 'cllimit' => 500, 'titles' => $word ];
-        $query = $this->jsonQuery($queryParts);
+        $query = $this->jsonQuery($queryParts)['query'];
         $page = reset($query["pages"]);
         return $page['categories'];
     }
@@ -56,8 +56,8 @@ class ApiWiktionator extends Wiktionator
         $category = str_replace( " ", "_", $category );
         $sortkey = $this->generateRandomSortKey();
         $queryParts = ['list'=>'categorymembers','cmtitle'=>'Category:'.$category,'cmprop'=>'title','cmnamespace'=>0,
-                       'cmtype'=>'page','cmlimit'=>50,'cmsort'=>'sortkey','cmstartsortkeyprefix'=>$sortkey];
-        $words = $this->jsonQuery($queryParts);
+                       'cmtype'=>'page','cmlimit'=>500,'cmsort'=>'sortkey','cmstartsortkeyprefix'=>$sortkey];
+        $words = $this->jsonQuery($queryParts)['query'];
         $cm = $words['categorymembers'];
 
         return Util::randomFromArray($cm)['title'];
