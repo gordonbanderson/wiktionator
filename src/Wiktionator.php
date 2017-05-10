@@ -4,6 +4,10 @@ namespace TzLion\Wiktionator;
 
 abstract class Wiktionator {
 
+    /**
+     * @param array|null $dbConnectionDetails
+     * @return Wiktionator
+     */
     public static function getInstance( $dbConnectionDetails = null )
     {
         if ( $dbConnectionDetails && DbWiktionator::canConnect( $dbConnectionDetails ) ) {
