@@ -45,7 +45,19 @@ abstract class Wiktionator {
 
     /**
      * @param string $word
+     * @param string $lang
      * @return bool
      */
-    public abstract function wordExistsInLanguage( $word, $lang='en' );
+    public function wordExistsInLanguage( $word, $lang = 'English' )
+    {
+        $cats = $this->getWordCategories($word) ?: [];
+        $langName = str_replace(' ','[ _]',preg_quote($lang));
+        $langRegex = "/^(Category:)?$langName/";
+        foreach( $cats as $cat ) {
+            if ( preg_match($langRegex, $cat['title']) ) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

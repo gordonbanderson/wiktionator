@@ -44,6 +44,9 @@ class DbWiktionator extends Wiktionator
     public function getWordCategories($word)
     {
         $wordId = $this->getWordId( $word );
+        if ( !$wordId ) {
+            return null;
+        }
         return $this->db->fetch( NeoDb::F_ALL, "SELECT cat_title AS title FROM categorylinks LEFT JOIN category ON cat_id = cl_cat WHERE cl_page = ?", [ $wordId ] );
     }
 
@@ -76,11 +79,5 @@ class DbWiktionator extends Wiktionator
     {
         $cat = $this->db->fetch( NeoDb::F_ONE, "SELECT cat_title FROM category WHERE cat_id = ?", [ $catId ] );
         return str_replace( "_", " ", $cat );
-    }
-
-    public function wordExistsInLanguage($word, $lang='en')
-    {
-        if ( $lang != 'en' ) throw new \Exception('Language not supported yet');
-        return (bool) $this->db->fetch( NeoDb::F_ONE, "SELECT page_id FROM page WHERE page_title = ? AND page_namespace = 0", [ $word ] );
     }
 }

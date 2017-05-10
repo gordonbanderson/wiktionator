@@ -48,7 +48,7 @@ class ApiWiktionator extends Wiktionator
         $queryParts = [ 'prop' => 'categories', 'cllimit' => 500, 'titles' => $word ];
         $query = $this->jsonQuery($queryParts)['query'];
         $page = reset($query["pages"]);
-        return $page['categories'];
+        return isset($page['categories']) ? $page['categories'] : null;
     }
 
     public function getRandomWordInCategory($category)
@@ -61,11 +61,6 @@ class ApiWiktionator extends Wiktionator
         $cm = $words['categorymembers'];
 
         return Util::randomFromArray($cm)['title'];
-    }
-
-    public function wordExistsInLanguage($word, $lang='en')
-    {
-        throw new \Exception( "Not implemented here" );
     }
 
     private function generateRandomSortkey()
