@@ -47,7 +47,7 @@ class DbWiktionator extends Wiktionator
         if ( !$wordId ) {
             return null;
         }
-        return $this->db->fetch( NeoDb::F_ALL, "SELECT cat_title AS title FROM categorylinks LEFT JOIN category ON cat_id = cl_cat WHERE cl_page = ?", [ $wordId ] );
+        return $this->db->fetch( NeoDb::F_COLUMN, "SELECT REPLACE(cat_title,'_',' ') AS title FROM categorylinks LEFT JOIN category ON cat_id = cl_cat WHERE cl_page = ?", [ $wordId ] );
     }
 
     public function getRandomWordInCategory($category)

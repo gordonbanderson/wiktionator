@@ -54,7 +54,7 @@ abstract class Wiktionator {
         $langName = str_replace(' ','[ _]',preg_quote($lang));
         $langRegex = "/^(Category:)?$langName/";
         foreach( $cats as $cat ) {
-            if ( preg_match($langRegex, $cat['title']) ) {
+            if ( preg_match($langRegex, $cat) ) {
                 return true;
             }
         }

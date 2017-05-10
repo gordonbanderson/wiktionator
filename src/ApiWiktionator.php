@@ -48,7 +48,13 @@ class ApiWiktionator extends Wiktionator
         $queryParts = [ 'prop' => 'categories', 'cllimit' => 500, 'titles' => $word ];
         $query = $this->jsonQuery($queryParts)['query'];
         $page = reset($query["pages"]);
-        return isset($page['categories']) ? $page['categories'] : null;
+        if ( !isset($page['categories']) ) {
+            return null;
+        }
+        $catCallback = function($item) {
+            return preg_replace('~^Category:~','',$item['title']);
+        };
+        return array_map($catCallback,$page['categories']);
     }
 
     public function getRandomWordInCategory($category)
