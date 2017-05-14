@@ -27,7 +27,7 @@ class ApiWiktionator extends Wiktionator
 
     public function getWordPage( $word )
     {
-        $queryParts = [ 'rawcontinue' => 'iguess', 'titles' => strtolower($word), 'rvprop' => 'content',
+        $queryParts = [ 'rawcontinue' => 'iguess', 'titles' => $word, 'rvprop' => 'content',
                         'prop' => 'revisions', 'redirect' => 1 ];
         $stuff = $this->xmlQuery($queryParts);
         return (string)$stuff->query->pages->page->revisions->rev;
