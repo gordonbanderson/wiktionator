@@ -1,6 +1,6 @@
 {
   "name": "tzlion/wiktionator",
-  "description": "wiktionary word category lookup",
+  "description": "English Wiktionary word category lookup & randomisation",
   "license": "MIT",
   "authors": [
     {
