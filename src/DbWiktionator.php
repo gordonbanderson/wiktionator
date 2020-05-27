@@ -41,23 +41,71 @@ class DbWiktionator extends Wiktionator
         return (bool) $this->db->fetch( NeoDb::F_ONE, "SELECT * FROM categorylinks WHERE cl_page = ? AND cl_cat = ?", [ $wordId, $catId ] );
     }
 
+
+    /**
+     * @param string $word a word, such as 'dog'
+     * @return array|mixed|null
+     * @throws \Exception
+     */
     public function getWordCategories($word)
     {
         $wordId = $this->getWordId( $word );
+        error_log('WORD ID: ' . $word . ' --> ' . $wordId);
         if ( !$wordId ) {
             return null;
         }
-        return $this->db->fetch( NeoDb::F_COLUMN, "SELECT REPLACE(cat_title,'_',' ') AS title FROM categorylinks LEFT JOIN category ON cat_id = cl_cat WHERE cl_page = ?", [ $wordId ] );
+        return $this->db->fetch( NeoDb::F_COLUMN, "SELECT cl_to AS title FROM categorylinks LEFT JOIN category ON cat_id = cl_to WHERE cl_from = ?", [ $wordId ] );
     }
 
+
+    /**
+     * @param string $category
+     * @return string|string[]
+     * @throws \Exception
+     */
     public function getRandomWordInCategory($category)
     {
-        $catId = $this->getCatId( $category );
-        $wordId = $this->db->fetch( NeoDb::F_ONE, "SELECT cl_page FROM categorylinks WHERE cl_type = 'page' AND cl_cat = ? ORDER BY RAND() LIMIT 1", [ $catId ] );
+        $wordId = $this->db->fetch( NeoDb::F_ONE, "SELECT cl_from FROM categorylinks WHERE cl_type = 'page' AND cl_to = ? ORDER BY RAND() LIMIT 1", [ $category ] );
         $res = $this->getWordTitle( $wordId );
         return $res;
     }
 
+
+    /**
+     * @param string $category
+     * @return string|string[]
+     * @throws \Exception
+     */
+    public function getRandomWordsInCategory($category, $limit = 10)
+    {
+        $query = "SELECT cl_from FROM categorylinks WHERE cl_type = 'page' AND cl_to = ? ORDER BY RAND() LIMIT ? ";
+        $wordIds = $this->db->fetch( NeoDb::F_COLUMN, $query, [ $category, $limit ] );
+        $words = [];
+        foreach($wordIds as $wordId) {
+            $words[] = $this->getWordTitle($wordId);
+        }
+        return $words;
+    }
+
+    public function getWordsInCategory($category, $limit = 10, $offset=0)
+    {
+        $query = "SELECT cl_from FROM categorylinks WHERE cl_type = 'page' AND cl_to = ? LIMIT ? OFFSET ?";
+        $wordIds = $this->db->fetch( NeoDb::F_COLUMN, $query, [ $category, $limit, $offset ] );
+        $words = [];
+        foreach($wordIds as $wordId) {
+            $words[] = $this->getWordTitle($wordId);
+        }
+        return $words;
+    }
+
+
+    /**
+     * Words are modelled as a table called page, the word is the page_title field
+     *
+     * @param string $word
+     * @return array|mixed|null
+     * @throws \Exception
+     */
     private function getWordId( $word )
     {
         return $this->db->fetch( NeoDb::F_ONE, "SELECT page_id FROM page WHERE page_title = ? AND page_namespace = 0", [ $word ] );
