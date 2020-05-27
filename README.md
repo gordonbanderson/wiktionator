@@ -16,6 +16,21 @@ You can also use a copy of the Wiktionary data in a MySQL database derived from 
 much faster than calling the API if your application needs to do a lot of lookups. 
 But it's also extremely preliminary and you'll need to provide and host your own (large) DB.
 
+#### Creating Local Database
+1) Get dumps of relevant tables
+```bash
+wget https://dumps.wikimedia.org/enwiktionary/latest/enwiktionary-latest-categorylinks.sql.gz
+wget https://dumps.wikimedia.org/enwiktionary/latest/enwiktionary-latest-category.sql.gz
+wget https://dumps.wikimedia.org/enwiktionary/latest/enwiktionary-latest-page.sql.gz
+```
+2) Using a newly created clean database, pipe the gzip files to create the tables.  Note this takes a few hours.
+```bash
+zcat enwiktionary-latest-categorylinks.sql.gz | mysql -u 'youruser' --password=yourpassword your_database
+zcat enwiktionary-latest-category.sql.gz | mysql -u 'youruser' --password=yourpassword your_database
+zcat enwiktionary-latest-page.sql.gz | mysql -u 'youruser' --password=yourpassword your_database
+```
+
+#### Using PHP Code
 Instantiate `TzLion\Wiktionator\DbWiktionator` with an array of connection details like this:
 
 `new TzLion\Wiktionator\DbWiktionator(['hostname', 'username', 'password', 'database_name'])`
